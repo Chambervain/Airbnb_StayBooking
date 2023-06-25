@@ -1,5 +1,6 @@
 package com.laioffer.staybooking.config;
 
+import com.laioffer.staybooking.filter.JwtFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -7,8 +8,10 @@ import org.springframework.security.config.annotation.authentication.builders.Au
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import javax.sql.DataSource;
 
@@ -16,8 +19,11 @@ import javax.sql.DataSource;
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
     private final DataSource dataSource;
 
-    public SecurityConfig(DataSource dataSource) {
+    private final JwtFilter jwtFilter;
+
+    public SecurityConfig(DataSource dataSource, JwtFilter jwtFilter) {
         this.dataSource = dataSource;
+        this.jwtFilter = jwtFilter;
     }
 
 
@@ -27,12 +33,20 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers(HttpMethod.POST, "/register/*").permitAll()
                 .antMatchers(HttpMethod.POST,"/authenticate/*").permitAll()
-                .antMatchers("/stays").permitAll()
-                .antMatchers("/stays/*").permitAll()
+                .antMatchers("/stays").hasAuthority("ROLE_HOST")
+                .antMatchers("/stays/*").hasAuthority("ROLE_HOST")
+                .antMatchers("/search").hasAuthority("ROLE_GUEST")
                 .anyRequest().authenticated()
                 .and()
                 .csrf()
                 .disable();
+
+        http
+                .sessionManagement()
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and()
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
+
     }
 
     @Bean

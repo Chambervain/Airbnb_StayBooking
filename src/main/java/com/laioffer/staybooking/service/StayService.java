@@ -1,14 +1,15 @@
 package com.laioffer.staybooking.service;
 
 import com.laioffer.staybooking.exception.StayNotExistException;
+import com.laioffer.staybooking.model.Location;
 import com.laioffer.staybooking.model.Stay;
 import com.laioffer.staybooking.model.StayImage;
 import com.laioffer.staybooking.model.User;
+import com.laioffer.staybooking.repository.LocationRepository;
 import com.laioffer.staybooking.repository.StayRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -20,9 +21,15 @@ public class StayService {
 
     private final ImageStorageService imageStorageService;
 
-    public StayService(StayRepository stayRepository, ImageStorageService imageStorageService) {
+    private final LocationRepository locationRepository;
+
+    private final GeoCodingService geoCodingService;
+
+    public StayService(StayRepository stayRepository, ImageStorageService imageStorageService, LocationRepository locationRepository, GeoCodingService geoCodingService) {
         this.stayRepository = stayRepository;
         this.imageStorageService = imageStorageService;
+        this.locationRepository = locationRepository;
+        this.geoCodingService = geoCodingService;
     }
 
     public List<Stay> listByUser(String username) {
@@ -48,9 +55,12 @@ public class StayService {
         for (String mediaLink : mediaLinks) {
             stayImages.add(new StayImage(mediaLink, stay));
         }
-        stay.setImages(stayImages);
 
+        stay.setImages(stayImages);
         stayRepository.save(stay);
+
+        Location location = geoCodingService.getLatLng(stay.getId(), stay.getAddress());
+        locationRepository.save(location);
     }
 
     @Transactional
