@@ -30,7 +30,7 @@ public class SearchController {
         LocalDate checkinDate = LocalDate.parse(start, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
         LocalDate checkoutDate = LocalDate.parse(end, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
         if (checkinDate.equals(checkoutDate) || checkinDate.isAfter(checkoutDate) || checkinDate.isBefore(LocalDate.now())) {
-            throw new InvalidSearchDateException("Invalid date for Search");
+            throw new InvalidSearchDateException("Invalid Date for Search");
         }
         return searchService.search(guestNumber, checkinDate, checkoutDate, lat, lon, distance);
     }
