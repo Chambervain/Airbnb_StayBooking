@@ -46,4 +46,24 @@ public class CustomExceptionHandler {
         return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(ReservationCollisionException.class)
+    public final ResponseEntity<String> handleReservationCollisionExceptions(Exception ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(InvalidReservationDateException.class)
+    public final ResponseEntity<String> handleInvalidReservationDateExceptions(Exception ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+    @ExceptionHandler(ReservationNotFoundException.class)
+    public final ResponseEntity<String> handleReservationNotFoundExceptions(Exception ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(StayDeleteException.class)
+    public final ResponseEntity<String> handleStayDeleteExceptions(Exception ex) {
+        return new ResponseEntity<>(ex.getMessage(), HttpStatus.CONFLICT);
+    }
+
 }

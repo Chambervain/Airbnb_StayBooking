@@ -16,6 +16,13 @@ public class StayReservedDate implements Serializable {
     @MapsId("stay_id")
     private Stay stay;
 
+    public StayReservedDate() {}
+
+    public StayReservedDate(StayReservedDateKey id, Stay stay) {
+        this.id = id;
+        this.stay = stay;
+    }
+
     public StayReservedDateKey getId() {
         return id;
     }

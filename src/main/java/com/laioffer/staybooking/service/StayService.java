@@ -1,15 +1,16 @@
 package com.laioffer.staybooking.service;
 
+import com.laioffer.staybooking.exception.StayDeleteException;
 import com.laioffer.staybooking.exception.StayNotExistException;
-import com.laioffer.staybooking.model.Location;
-import com.laioffer.staybooking.model.Stay;
-import com.laioffer.staybooking.model.StayImage;
-import com.laioffer.staybooking.model.User;
+import com.laioffer.staybooking.model.*;
 import com.laioffer.staybooking.repository.LocationRepository;
+import com.laioffer.staybooking.repository.ReservationRepository;
 import com.laioffer.staybooking.repository.StayRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -25,11 +26,14 @@ public class StayService {
 
     private final GeoCodingService geoCodingService;
 
-    public StayService(StayRepository stayRepository, ImageStorageService imageStorageService, LocationRepository locationRepository, GeoCodingService geoCodingService) {
+    private final ReservationRepository reservationRepository;
+
+    public StayService(StayRepository stayRepository, ImageStorageService imageStorageService, LocationRepository locationRepository, GeoCodingService geoCodingService, ReservationRepository reservationRepository) {
         this.stayRepository = stayRepository;
         this.imageStorageService = imageStorageService;
         this.locationRepository = locationRepository;
         this.geoCodingService = geoCodingService;
+        this.reservationRepository = reservationRepository;
     }
 
     public List<Stay> listByUser(String username) {
@@ -71,6 +75,11 @@ public class StayService {
 
         if(stay == null){
             throw new StayNotExistException("Stay Does Not Exist");
+        }
+
+        List<Reservation> reservations = reservationRepository.findByStayAndCheckoutDateAfter(stay, LocalDate.now());
+        if (reservations != null && reservations.size() > 0) {
+            throw new StayDeleteException("Cannot Delete Stay with Active Reservation");
         }
 
         stayRepository.deleteById(stayId);
