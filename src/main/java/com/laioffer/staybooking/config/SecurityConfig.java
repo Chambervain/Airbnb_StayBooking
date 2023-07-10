@@ -27,6 +27,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
 
+//    1. The hasAuthority function check if user authentication details include the specified authority
+//    2. Ensures for both user authentication and authority check
+//    3. anyRequest.authenticated function indicates that any other url_pattern requests need authentication
+
+
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
